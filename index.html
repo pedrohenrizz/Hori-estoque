@@ -52,7 +52,7 @@ let S={filiais:[],ativos:[],movs:[],supr:[]},tab="dash",q="",fF="",fS="",docRef=
 const $=s=>document.querySelector(s),esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const toast=t=>{const e=$("#toast");e.textContent=t;e.style.display="block";setTimeout(()=>e.style.display="none",2200)};
 const now=()=>new Date().toLocaleString("pt-BR");
-const CFG={url:"https://sfejenutgnvdviriysjb.supabase.co/rest/v1/",key:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNmZWplbnV0Z252ZHZpcml5c2piIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI5NDc2OTYsImV4cCI6MjEwODUyMzY5Nn0.-tSNotkaZJqmm050_KS_uYv5qM_k127Ptkj3duDmfz4"};
+const CFG={url:"https://sfejenutgnvdviriysjb.supabase.co",key:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNmZWplbnV0Z252ZHZpcml5c2piIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI5NDc2OTYsImV4cCI6MjEwODUyMzY5Nn0.-tSNotkaZJqmm050_KS_uYv5qM_k127Ptkj3duDmfz4"};
 const sb=CFG.url.startsWith("https")?supabase.createClient(CFG.url,CFG.key):null;
 const T={filiais:"ti_filiais",ativos:"ti_ativos",movs:"ti_movs",supr:"ti_supr"},idOf={filiais:r=>r.id,ativos:r=>r.cod,movs:r=>r.id,supr:r=>r.cod};
 let snap={},chain=Promise.resolve(),rt;
