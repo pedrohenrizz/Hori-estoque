@@ -53,7 +53,8 @@ const $=s=>document.querySelector(s),esc=s=>String(s??"").replace(/[&<>"]/g,c=>(
 const toast=t=>{const e=$("#toast");e.textContent=t;e.style.display="block";setTimeout(()=>e.style.display="none",2200)};
 const now=()=>new Date().toLocaleString("pt-BR");
 const CFG={url:"https://sfejenutgnvdviriysjb.supabase.co",key:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNmZWplbnV0Z252ZHZpcml5c2piIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI5NDc2OTYsImV4cCI6MjEwODUyMzY5Nn0.-tSNotkaZJqmm050_KS_uYv5qM_k127Ptkj3duDmfz4"};
-const sb=CFG.url.startsWith("https")?supabase.createClient(CFG.url,CFG.key):null;
+let base="";try{base=new URL(CFG.url.trim()).origin}catch(e){}
+const sb=base.startsWith("https")?supabase.createClient(base,CFG.key.trim()):null;
 const T={filiais:"ti_filiais",ativos:"ti_ativos",movs:"ti_movs",supr:"ti_supr"},idOf={filiais:r=>r.id,ativos:r=>r.cod,movs:r=>r.id,supr:r=>r.cod};
 let snap={},chain=Promise.resolve(),rt;
 const movId=()=>"MOV-"+Date.now().toString(36).toUpperCase()+Math.random().toString(36).slice(2,4).toUpperCase();
@@ -106,7 +107,7 @@ function mov(a,tipo,dest,motivo){
 const tabs=[["dash","📊","Início"],["ativos","💻","Ativos"],["scan","📷","Escanear"],["supr","📦","Suprimentos"],["movs","🔄","Histórico"],["fil","🏢","Filiais"]];
 function render(){
   $("#nav").innerHTML="<h1>🗂️ Inventário <span>TI</span></h1>"+tabs.map(([k,i,l])=>`<button class="${tab===k?"on":""}" onclick="go('${k}')"><span>${i}</span>${l}</button>`).join("")+(sb?'<button onclick="logout()"><span>🚪</span>Sair</button>':"");
-  const v={dash,ativos,scan,supr,movs,fil:filiais}[tab];$("#m").innerHTML=v();if(tab==="scan")startCam()
+  const v={dash,ativos,scan,supr,movs,fil:filiais}[tab];$("#m").innerHTML=(sb?"":`<div class="card" style="border-color:var(--er);color:var(--er)"><b>⚠️ Modo local: banco não conectado.</b> Os dados ficam só neste aparelho e não são compartilhados. Cole a URL e a chave do Supabase no começo do script do index.html.</div>`)+v();if(tab==="scan")startCam()
 }
 const go=k=>{tab=k;q="";render();scrollTo(0,0)};
 function dash(){
