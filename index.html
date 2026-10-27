@@ -1,213 +1,109 @@
 <!DOCTYPE html>
 <html lang="pt-BR"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Inventário de TI</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<title>Equipamentos e Contatos</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <style>
-:root{--bg:#f4f6fb;--sf:#fff;--tx:#1b2333;--mu:#667085;--bd:#e3e8f0;--pr:#4f46e5;--pt:#fff;--ok:#12805c;--wa:#b7791f;--er:#c0392b;--sh:0 1px 3px rgba(20,30,60,.08);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1420;--sf:#181f2e;--tx:#e8ecf5;--mu:#98a2b8;--bd:#2a3347;--pr:#818cf8;--pt:#10142a;--ok:#4ade80;--wa:#fbbf24;--er:#f87171;color-scheme:dark}}
-:root[data-theme="dark"]{--bg:#0f1420;--sf:#181f2e;--tx:#e8ecf5;--mu:#98a2b8;--bd:#2a3347;--pr:#818cf8;--pt:#10142a;--ok:#4ade80;--wa:#fbbf24;--er:#f87171;color-scheme:dark}
-html{scroll-padding-top:env(safe-area-inset-top,0px)}
+:root{--bg:#f4f6fb;--sf:#fff;--tx:#1b2333;--mu:#667085;--bd:#e3e8f0;--pr:#4f46e5;--pt:#fff;--er:#c0392b;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1420;--sf:#181f2e;--tx:#e8ecf5;--mu:#98a2b8;--bd:#2a3347;--pr:#818cf8;--pt:#10142a;--er:#f87171;color-scheme:dark}}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--sf);z-index:10}
-.app{display:flex;min-height:100vh}
-nav{width:220px;background:var(--sf);border-right:1px solid var(--bd);padding:16px 10px;position:sticky;top:env(safe-area-inset-top,0px);height:100vh;flex-shrink:0}
-nav h1{font-size:17px;margin:4px 10px 16px}nav h1 span{color:var(--pr)}
-nav button{display:flex;gap:10px;align-items:center;width:100%;border:0;background:none;color:var(--mu);padding:10px 12px;border-radius:10px;font:inherit;cursor:pointer;text-align:left}
-nav button.on{background:color-mix(in srgb,var(--pr) 14%,transparent);color:var(--pr);font-weight:600}
-main{flex:1;min-width:0;padding:20px;max-width:1100px;margin:0 auto;width:100%}
-h2{margin:0 0 14px;font-size:22px}
-.card{background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:16px;box-shadow:var(--sh);margin-bottom:14px}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:14px}
-.kpi b{display:block;font-size:28px}.kpi span{color:var(--mu);font-size:13px}
-.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
-input,select,textarea{font:inherit;color:var(--tx);background:var(--bg);border:1px solid var(--bd);border-radius:10px;padding:9px 11px;min-width:0;max-width:100%}
-.f{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
-.f label{display:grid;gap:4px;font-size:13px;color:var(--mu)}
+main{max-width:1150px;margin:0 auto;padding:18px}
+h1{font-size:22px;margin:0 0 4px}.mu{color:var(--mu)}
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:16px;margin-bottom:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:12px 0}
+input,textarea{font:inherit;color:var(--tx);background:var(--bg);border:1px solid var(--bd);border-radius:10px;padding:9px 11px;min-width:0;max-width:100%}
 .btn{background:var(--pr);color:var(--pt);border:0;border-radius:10px;padding:9px 14px;font:inherit;font-weight:600;cursor:pointer}
-.btn.g{background:none;color:var(--pr);border:1px solid var(--bd)}.btn.d{background:var(--er);color:#fff}.btn.s{padding:6px 10px;font-size:13px}
+.btn.g{background:none;color:var(--pr);border:1px solid var(--bd)}.btn.d{background:var(--er);color:#fff}.btn.s{padding:3px 8px}
 .tw{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:14px}
-th,td{padding:9px 10px;text-align:left;border-bottom:1px solid var(--bd);white-space:nowrap}th{color:var(--mu);font-weight:600;font-size:12px;text-transform:uppercase}
+th,td{padding:9px 10px;text-align:left;border-bottom:1px solid var(--bd);white-space:nowrap}th{color:var(--mu);font-size:12px;text-transform:uppercase}
 tr.c{cursor:pointer}tr.c:hover{background:var(--bg)}
-.tag{display:inline-block;padding:2px 9px;border-radius:99px;font-size:12px;font-weight:600;background:var(--bg);border:1px solid var(--bd)}
-.t-Em-uso{color:var(--ok)}.t-Manutenção{color:var(--wa)}.t-Baixado{color:var(--er)}.t-Disponível{color:var(--pr)}
-.modal{position:fixed;inset:0;background:rgba(10,15,30,.55);display:flex;align-items:flex-end;justify-content:center;z-index:50;padding:0}
+.f{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}.f label{display:grid;gap:4px;font-size:13px;color:var(--mu)}
+.modal{position:fixed;inset:0;background:rgba(10,15,30,.55);display:flex;align-items:flex-end;justify-content:center;z-index:50}
 .modal>div{background:var(--sf);width:100%;max-width:640px;max-height:92vh;overflow:auto;border-radius:18px 18px 0 0;padding:20px}
 @media(min-width:700px){.modal{align-items:center;padding:20px}.modal>div{border-radius:18px}}
-.qr{display:flex;gap:14px;align-items:center;flex-wrap:wrap}.qr svg,.qr img{width:130px;height:130px;background:#fff;padding:6px;border-radius:8px}
-.mu{color:var(--mu)}.bar{height:8px;border-radius:6px;background:var(--bd);overflow:hidden}.bar i{display:block;height:100%;background:var(--pr)}
-.tl{border-left:2px solid var(--bd);margin-left:6px;padding-left:14px}.tl div{margin-bottom:10px;position:relative}.tl div::before{content:"";position:absolute;left:-20px;top:6px;width:10px;height:10px;border-radius:50%;background:var(--pr)}
-#toast{position:fixed;left:50%;bottom:80px;transform:translateX(-50%);background:var(--tx);color:var(--bg);padding:10px 16px;border-radius:10px;z-index:99;display:none}
-@media(max-width:760px){.app{display:block}nav{position:fixed;bottom:0;top:auto;left:0;right:0;width:auto;height:auto;display:flex;padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px));border-right:0;border-top:1px solid var(--bd);z-index:20}
-nav h1{display:none}nav button{flex-direction:column;gap:2px;padding:6px 2px;font-size:11px;justify-content:center;align-items:center;text-align:center}main{padding:14px 14px 90px}}
-@media print{body *{visibility:hidden}.lab,.lab *{visibility:visible}.lab{position:absolute;left:0;top:0}}
+#toast{position:fixed;left:50%;bottom:30px;transform:translateX(-50%);background:var(--tx);color:var(--bg);padding:10px 16px;border-radius:10px;z-index:99;display:none}
 </style></head><body>
-<div class="app"><nav id="nav"></nav><main id="m"></main></div><div id="toast"></div><div id="md"></div>
+<main id="m"></main><div id="toast"></div><div id="md"></div>
 <script>
-const CATS={NB:"Notebook",DT:"Desktop",MON:"Monitor",CEL:"Celular",IMP:"Impressora",MOU:"Mouse",TEC:"Teclado",OUT:"Outros"};
-const ST=["Disponível","Em uso","Manutenção","Baixado"];
-const TIPOS=["Transferência","Atribuição","Devolução","Envio à manutenção","Retorno da manutenção","Perda/Avaria","Baixa"];
-let S={filiais:[],ativos:[],movs:[],supr:[]},tab="dash",q="",fF="",fS="",docRef=null,me="Usuário local";
-const $=s=>document.querySelector(s),esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const toast=t=>{const e=$("#toast");e.textContent=t;e.style.display="block";setTimeout(()=>e.style.display="none",2200)};
-const now=()=>new Date().toLocaleString("pt-BR");
+// ===== CONFIGURAÇÃO: cole aqui a URL e a chave anon do Supabase =====
 const CFG={url:"https://sfejenutgnvdviriysjb.supabase.co",key:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNmZWplbnV0Z252ZHZpcml5c2piIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI5NDc2OTYsImV4cCI6MjEwODUyMzY5Nn0.-tSNotkaZJqmm050_KS_uYv5qM_k127Ptkj3duDmfz4"};
-const sb=CFG.url.startsWith("https")?supabase.createClient(CFG.url,CFG.key):null;
-const T={filiais:"ti_filiais",ativos:"ti_ativos",movs:"ti_movs",supr:"ti_supr"},idOf={filiais:r=>r.id,ativos:r=>r.cod,movs:r=>r.id,supr:r=>r.cod};
-let snap={},chain=Promise.resolve(),rt;
-const movId=()=>"MOV-"+Date.now().toString(36).toUpperCase()+Math.random().toString(36).slice(2,4).toUpperCase();
+// ====================================================================
+let base="";try{base=new URL(CFG.url.trim()).origin}catch(e){}
+const sb=base.startsWith("https")?supabase.createClient(base,CFG.key.trim()):null;
+const TB="ti_ativos";let S=[],q="",shown={},snap={},chain=Promise.resolve(),rt;
+const $=s=>document.querySelector(s),esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const toast=t=>{const e=$("#toast");e.textContent=t;e.style.display="block";setTimeout(()=>e.style.display="none",2600)};
+const uid=()=>"P"+Date.now().toString(36).toUpperCase()+Math.random().toString(36).slice(2,6).toUpperCase();
+const norm=s=>String(s).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
 async function load(){
-  if(!sb){try{const j=localStorage.getItem("inv");if(j)S=Object.assign(S,JSON.parse(j))}catch(e){}return}
-  for(const k in T){const{data,error}=await sb.from(T[k]).select("id,data").order("updated_at",{ascending:k==="movs"?false:true});
-    if(error){toast("Erro ao carregar: "+error.message);continue}
-    S[k]=data.map(r=>r.data);snap[k]=Object.fromEntries(data.map(r=>[r.id,JSON.stringify(r.data)]))}
+  if(!sb){try{S=JSON.parse(localStorage.getItem("eq")||"[]")}catch(e){}return}
+  const{data,error}=await sb.from(TB).select("id,data").order("updated_at");
+  if(error)return toast("Erro ao carregar: "+error.message);
+  const L=data.filter(r=>r.data&&r.data.v===2);S=L.map(r=>r.data);snap=Object.fromEntries(L.map(r=>[r.id,JSON.stringify(r.data)]))
 }
 async function _save(){
-  if(!sb){try{localStorage.setItem("inv",JSON.stringify(S))}catch(e){}return}
-  for(const k in T){const old=snap[k]||(snap[k]={});
-    for(const r of S[k]){const id=idOf[k](r),js=JSON.stringify(r);if(old[id]===js)continue;
-      const res=old[id]===undefined?await sb.from(T[k]).insert({id,data:r}):await sb.from(T[k]).update({data:r,updated_at:new Date().toISOString()}).eq("id",id);
-      if(res.error){toast(res.error.code==="23505"?"Código já criado por outro usuário. Atualizando…":"Erro ao salvar: "+res.error.message);await load();render();return}
-      old[id]=js}}
+  if(!sb){try{localStorage.setItem("eq",JSON.stringify(S))}catch(e){}return}
+  for(const r of S){const js=JSON.stringify(r);if(snap[r.id]===js)continue;
+    const res=snap[r.id]===undefined?await sb.from(TB).insert({id:r.id,data:r}):await sb.from(TB).update({data:r,updated_at:new Date().toISOString()}).eq("id",r.id);
+    if(res.error){toast("Erro ao salvar: "+res.error.message);await load();render();return}snap[r.id]=js}
 }
 const save=()=>chain=chain.then(_save);
-function loginView(){$("#nav").innerHTML="";$("#m").innerHTML=`<div class="card" style="max-width:380px;margin:12vh auto"><h2>🗂️ Inventário TI</h2><div class="f" style="grid-template-columns:1fr"><label>E-mail<input id="le" type="email"></label><label>Senha<input id="lp" type="password" onkeydown="if(event.key==='Enter')login()"></label></div><div class="row" style="margin-top:14px"><button class="btn" onclick="login()">Entrar</button></div></div>`}
+const vis=()=>S.filter(r=>!r.removido&&(!q||norm([r.nome,r.tel,r.email,r.modelo,r.serie].join(" ")).includes(norm(q))));
+function render(){
+  const L=vis();
+  $("#m").innerHTML=(sb?"":`<div class="card" style="border-color:var(--er);color:var(--er)"><b>⚠️ Modo local:</b> banco não conectado. Os dados ficam só neste aparelho. Preencha CFG no começo do script.</div>`)+
+  `<h1>Equipamentos e contatos</h1><div class="mu">${S.filter(r=>!r.removido).length} registros</div>
+  <div class="row"><input id="sq" placeholder="Buscar nome, e-mail, modelo, série…" value="${esc(q)}" oninput="q=this.value;keep()" style="flex:1;min-width:180px">
+  <button class="btn" onclick="edit()">+ Novo</button><button class="btn g" onclick="formImp()">Importar planilha</button><button class="btn g" onclick="exportar()">Exportar planilha</button>${sb?'<button class="btn g" onclick="logout()">Sair</button>':""}</div>
+  <div class="card tw"><table><tr><th>Nome</th><th>Contato corporativo</th><th>E-mail</th><th>Senha notebook</th><th>Modelo</th><th>Série</th></tr>
+  ${L.map(r=>`<tr class="c" onclick="edit('${r.id}')"><td><b>${esc(r.nome)}</b></td><td>${esc(r.tel)||"—"}</td><td>${esc(r.email)||"—"}</td><td onclick="event.stopPropagation()">${shown[r.id]?esc(r.senha):r.senha?"••••••":"—"} ${r.senha?`<button class="btn g s" onclick="shown['${r.id}']=!shown['${r.id}'];keep()">👁</button>`:""}</td><td>${esc(r.modelo)||"—"}</td><td>${esc(r.serie)||"—"}</td></tr>`).join("")||'<tr><td colspan="6" class="mu">Nenhum registro. Use "+ Novo" ou "Importar planilha".</td></tr>'}</table></div>`
+}
+function keep(){const el=document.activeElement,id=el&&el.id,p=el&&el.selectionStart;render();if(id==="sq"){const e=$("#sq");e.focus();e.setSelectionRange(p,p)}}
+const modal=h=>$("#md").innerHTML=`<div class="modal" onclick="if(event.target===this)closeM()"><div>${h}</div></div>`,closeM=()=>$("#md").innerHTML="";
+function edit(id){
+  const r=S.find(x=>x.id===id)||{};
+  modal(`<h2 style="margin-top:0">${id?"Editar":"Novo registro"}</h2><div class="f">
+  <label>Nome<input id="f_n" value="${esc(r.nome)}"></label><label>Contato corporativo<input id="f_t" value="${esc(r.tel)}" placeholder="(31) 9 0000-0000"></label>
+  <label>E-mail<input id="f_e" type="email" value="${esc(r.email)}"></label><label>Senha do notebook (opcional)<input id="f_s" value="${esc(r.senha)}" autocomplete="off"></label>
+  <label>Modelo (opcional)<input id="f_m" value="${esc(r.modelo)}"></label><label>Nº de série (opcional)<input id="f_r" value="${esc(r.serie)}"></label></div>
+  <div class="row"><button class="btn" onclick="gravar('${id||""}')">Salvar</button><button class="btn g" onclick="closeM()">Cancelar</button>${id?`<button class="btn d" onclick="remover('${id}')" style="margin-left:auto">Remover</button>`:""}</div>`)
+}
+function gravar(id){
+  const v=i=>$("#"+i).value.trim(),nome=v("f_n");if(!nome)return toast("Informe o nome");
+  const d={nome,tel:v("f_t"),email:v("f_e"),senha:v("f_s"),modelo:v("f_m"),serie:v("f_r")};
+  if(d.serie&&S.some(x=>x.id!==id&&!x.removido&&norm(x.serie)===norm(d.serie)))return toast("Número de série já cadastrado");
+  const r=S.find(x=>x.id===id);if(r)Object.assign(r,d);else S.push({id:uid(),v:2,...d});
+  save();closeM();render();toast("Salvo")
+}
+function remover(id){if(!confirm("Remover este registro?"))return;S.find(x=>x.id===id).removido=true;save();closeM();render()}
+function exportar(){
+  const A=[["NOME","CONTATO CORPORATIVO","E-MAIL","SENHA NOTEBOOK","MODELO","SÉRIE"],...vis().map(r=>[r.nome,r.tel,r.email,r.senha,r.modelo,r.serie])];
+  const ws=XLSX.utils.aoa_to_sheet(A);ws["!cols"]=[{wch:38},{wch:20},{wch:40},{wch:20},{wch:22},{wch:22}];
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,"Equipamentos");XLSX.writeFile(wb,"equipamentos.xlsx");toast("Planilha exportada (contém senhas: guarde com cuidado)")
+}
+function formImp(){modal(`<h2 style="margin-top:0">Importar planilha</h2><p class="mu">Escolha um arquivo Excel (.xlsx) ou CSV. As colunas são reconhecidas pelo título: Nome, Contato, E-mail, Senha, Modelo, Série. Registros já existentes (mesmo nome e e-mail) são ignorados.</p><input type="file" accept=".xlsx,.xls,.csv" onchange="imp(this.files[0])"><div class="row"><button class="btn g" onclick="closeM()">Cancelar</button></div>`)}
+function imp(f){
+  if(!f)return;const rd=new FileReader();
+  rd.onload=()=>{try{
+    const wb=XLSX.read(rd.result,{type:"array"}),A=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,raw:false,defval:""});
+    const hi=A.findIndex(r=>r.some(c=>/nome/.test(norm(c))));if(hi<0)return toast("Não encontrei a coluna NOME");
+    const H=A[hi].map(norm),ix=re=>H.findIndex(h=>re.test(h)),m={n:ix(/nome/),t:ix(/contato|telefone|fone|cel/),e:ix(/mail/),s:ix(/senha/),m:ix(/modelo/),r:ix(/serie|serial/)};
+    const g=(r,k)=>m[k]>=0?String(r[m[k]]||"").trim():"";let n=0,sk=0;
+    for(const r of A.slice(hi+1)){const nome=g(r,"n");if(!nome)continue;const email=g(r,"e");
+      if(S.some(x=>!x.removido&&norm(x.nome)===norm(nome)&&norm(x.email)===norm(email))){sk++;continue}
+      S.push({id:uid(),v:2,nome,tel:g(r,"t"),email,senha:g(r,"s"),modelo:g(r,"m"),serie:g(r,"r")});n++}
+    save();closeM();render();toast(n+" importados"+(sk?`, ${sk} já existiam`:""))
+  }catch(e){toast("Não consegui ler o arquivo")}};
+  rd.readAsArrayBuffer(f)
+}
+function loginView(){$("#m").innerHTML=`<div class="card" style="max-width:380px;margin:12vh auto"><h1>🗂️ Equipamentos e contatos</h1><div class="f" style="grid-template-columns:1fr;margin-top:14px"><label>E-mail<input id="le" type="email"></label><label>Senha<input id="lp" type="password" onkeydown="if(event.key==='Enter')login()"></label></div><div class="row"><button class="btn" onclick="login()">Entrar</button></div></div>`}
 async function login(){const{error}=await sb.auth.signInWithPassword({email:$("#le").value.trim(),password:$("#lp").value});if(error)return toast("Erro: "+error.message);start()}
 async function logout(){await sb.auth.signOut();location.reload()}
 async function start(){
-  if(sb){const{data}=await sb.auth.getSession();if(!data.session)return loginView();me=data.session.user.email}
+  if(sb){const{data}=await sb.auth.getSession();if(!data.session)return loginView()}
   await load();render();
-  if(sb)sb.channel("ti").on("postgres_changes",{event:"*",schema:"public"},()=>{clearTimeout(rt);rt=setTimeout(async()=>{await chain;await load();if(!$("#md").innerHTML&&!document.activeElement.matches("input,textarea,select"))render()},700)}).subscribe();
-  const h=location.hash.slice(1);if(h)ficha(h)
-}
-const nextCode=cat=>{const p="TI-"+cat+"-";const n=S.ativos.filter(a=>a.cod.startsWith(p)).reduce((m,a)=>Math.max(m,+a.cod.slice(p.length)||0),0)+1;return p+String(n).padStart(6,"0")};
-const fil=id=>S.filiais.find(f=>f.id===id)?.nome||id||"—";
-const url=c=>location.href.split("#")[0]+"#"+c;
-function qrSvg(c){const q=qrcode(0,"M");q.addData(url(c));q.make();return q.createSvgTag({cellSize:4,margin:0})}
-function seed(){
-  S.filiais=[["FIL-001","Belo Horizonte"],["FIL-002","Contagem"],["FIL-003","São Paulo"]].map(([id,nome])=>({id,nome,locais:["Almoxarifado de TI","Administrativo","Manutenção"]}));
-  const mk=[["NB","Dell","Latitude 5440"],["DT","HP","ProDesk 400"],["MON","LG","24MK430"],["CEL","Samsung","Galaxy A54"]];
-  mk.forEach(([c,f,m],i)=>{for(let k=0;k<4;k++){S.ativos.push({cod:nextCode(c),cat:c,fab:f,mod:m,serie:"SN"+Math.random().toString(36).slice(2,9).toUpperCase(),fil:S.filiais[(i+k)%3].id,loc:"Administrativo",resp:k%2?"":"colaborador"+(k+1)+"@empresa.com",st:k%2?"Disponível":"Em uso",cond:"Bom",aq:"",gar:"",obs:""})}});
-  S.supr=[{cod:"SUP-MOU-001",desc:"Mouse USB com fio",min:20,max:100,saldos:{"FIL-001":45,"FIL-002":12,"FIL-003":30}},{cod:"SUP-TEC-001",desc:"Teclado USB ABNT2",min:10,max:60,saldos:{"FIL-001":8,"FIL-002":20,"FIL-003":15}}];
-  save();render();toast("Dados de exemplo carregados")
-}
-function mov(a,tipo,dest,motivo){
-  const m={id:movId(),cod:a.cod,tipo,dt:now(),user:me,de:`${fil(a.fil)} / ${a.loc}`,para:"",resp0:a.resp,resp1:"",motivo};
-  if(tipo==="Transferência"){a.fil=dest.fil;a.loc=dest.loc||a.loc}
-  if(tipo==="Atribuição"){a.resp=dest.resp;a.st="Em uso";m.resp1=dest.resp}
-  if(tipo==="Devolução"){a.resp="";a.st="Disponível"}
-  if(tipo==="Envio à manutenção"){a.st="Manutenção"}
-  if(tipo==="Retorno da manutenção"){a.st=a.resp?"Em uso":"Disponível"}
-  if(tipo==="Perda/Avaria"){a.st="Manutenção";a.cond="Avariado"}
-  if(tipo==="Baixa"){a.st="Baixado";a.resp=""}
-  m.para=`${fil(a.fil)} / ${a.loc}`;S.movs.unshift(m);save()
-}
-const tabs=[["dash","📊","Início"],["ativos","💻","Ativos"],["scan","📷","Escanear"],["supr","📦","Suprimentos"],["movs","🔄","Histórico"],["fil","🏢","Filiais"]];
-function render(){
-  $("#nav").innerHTML="<h1>🗂️ Inventário <span>TI</span></h1>"+tabs.map(([k,i,l])=>`<button class="${tab===k?"on":""}" onclick="go('${k}')"><span>${i}</span>${l}</button>`).join("")+(sb?'<button onclick="logout()"><span>🚪</span>Sair</button>':"");
-  const v={dash,ativos,scan,supr,movs,fil:filiais}[tab];$("#m").innerHTML=v();if(tab==="scan")startCam()
-}
-const go=k=>{tab=k;q="";render();scrollTo(0,0)};
-function dash(){
-  const A=S.ativos,c=s=>A.filter(a=>a.st===s).length,low=S.supr.flatMap(s=>Object.entries(s.saldos).filter(([f,n])=>n<s.min).map(([f,n])=>[s,f,n]));
-  const sem=A.filter(a=>!a.serie||!a.resp&&a.st==="Em uso").length;
-  const mx=Math.max(1,...S.filiais.map(f=>A.filter(a=>a.fil===f.id).length));
-  if(!A.length&&!S.filiais.length)return`<h2>Bem-vindo 👋</h2><div class="card"><p>Comece cadastrando uma filial ou carregue dados de exemplo para conhecer o sistema.</p><button class="btn" onclick="seed()">Carregar dados de exemplo</button> <button class="btn g" onclick="go('fil')">Cadastrar filial</button></div>`;
-  return`<h2>Painel geral</h2><div class="grid">
-  ${[["Ativos cadastrados",A.length],["Em uso",c("Em uso")],["Disponíveis",c("Disponível")],["Em manutenção",c("Manutenção")],["Itens abaixo do mínimo",low.length],["Dados incompletos",sem]].map(([l,n])=>`<div class="card kpi" style="margin:0"><b>${n}</b><span>${l}</span></div>`).join("")}</div>
-  <div class="card"><b>Ativos por filial</b><div style="margin-top:10px;display:grid;gap:10px">${S.filiais.map(f=>{const n=A.filter(a=>a.fil===f.id).length;return`<div><div class="row" style="justify-content:space-between;margin:0"><span>${esc(f.nome)}</span><span class="mu">${n}</span></div><div class="bar"><i style="width:${n/mx*100}%"></i></div></div>`}).join("")||'<span class="mu">Sem filiais</span>'}</div></div>
-  <div class="card"><b>⚠️ Estoque abaixo do mínimo</b>${low.map(([s,f,n])=>`<div style="padding:6px 0">${esc(s.desc)} — ${esc(fil(f))}: <b style="color:var(--er)">${n}</b> / mín ${s.min}</div>`).join("")||'<div class="mu">Tudo em ordem.</div>'}</div>
-  <div class="card"><b>Últimas movimentações</b>${S.movs.slice(0,5).map(m=>`<div style="padding:6px 0">${m.dt} · <b>${m.cod}</b> · ${m.tipo}</div>`).join("")||'<div class="mu">Nenhuma ainda.</div>'}</div>`
-}
-function ativos(){
-  const L=S.ativos.filter(a=>(!fF||a.fil===fF)&&(!fS||a.st===fS)&&(!q||(a.cod+a.serie+a.mod+a.resp+a.fab).toLowerCase().includes(q.toLowerCase())));
-  return`<h2>Ativos de TI</h2><div class="row"><input id="sq" placeholder="Buscar código, série, modelo…" value="${esc(q)}" oninput="q=this.value;keep()" style="flex:1;min-width:160px">
-  <select onchange="fF=this.value;render()"><option value="">Todas as filiais</option>${S.filiais.map(f=>`<option value="${f.id}" ${fF===f.id?"selected":""}>${esc(f.nome)}</option>`).join("")}</select>
-  <select onchange="fS=this.value;render()"><option value="">Todos status</option>${ST.map(s=>`<option ${fS===s?"selected":""}>${s}</option>`).join("")}</select>
-  <button class="btn" onclick="formAtivo()">+ Novo</button><button class="btn g" onclick="exportCsv()">Exportar CSV</button></div>
-  <div class="card tw"><table><tr><th>Código</th><th>Categoria</th><th>Modelo</th><th>Série</th><th>Filial</th><th>Responsável</th><th>Status</th></tr>
-  ${L.map(a=>`<tr class="c" onclick="ficha('${a.cod}')"><td><b>${a.cod}</b></td><td>${CATS[a.cat]}</td><td>${esc(a.fab+" "+a.mod)}</td><td>${esc(a.serie)||"—"}</td><td>${esc(fil(a.fil))}</td><td>${esc(a.resp)||"—"}</td><td><span class="tag t-${a.st.replace(" ","-")}">${a.st}</span></td></tr>`).join("")||'<tr><td colspan="7" class="mu">Nenhum ativo encontrado.</td></tr>'}</table></div>`
-}
-function keep(){const p=$("#m"),pos=$("#sq").selectionStart;const h=ativos();p.innerHTML=h;const e=$("#sq");e.focus();e.setSelectionRange(pos,pos)}
-function modal(h){$("#md").innerHTML=`<div class="modal" onclick="if(event.target===this)closeM()"><div>${h}</div></div>`}
-const closeM=()=>{$("#md").innerHTML="";if(location.hash)history.replaceState(null,"",location.pathname)};
-function formAtivo(){
-  if(!S.filiais.length)return toast("Cadastre uma filial primeiro");
-  modal(`<h2>Novo ativo</h2><div class="f">
-  <label>Categoria<select id="n_cat">${Object.entries(CATS).map(([k,v])=>`<option value="${k}">${v}</option>`).join("")}</select></label>
-  <label>Fabricante<input id="n_fab"></label><label>Modelo<input id="n_mod"></label><label>Nº de série<input id="n_ser"></label>
-  <label>Filial<select id="n_fil" onchange="locs()">${S.filiais.map(f=>`<option value="${f.id}">${esc(f.nome)}</option>`).join("")}</select></label>
-  <label>Local<select id="n_loc"></select></label><label>Responsável (e-mail)<input id="n_res" type="email"></label>
-  <label>Garantia até<input id="n_gar" type="date"></label></div>
-  <div class="row" style="margin-top:14px"><button class="btn" onclick="saveAtivo()">Salvar e gerar QR</button><button class="btn g" onclick="closeM()">Cancelar</button></div>`);locs()
-}
-function locs(){const f=S.filiais.find(f=>f.id===$("#n_fil").value);$("#n_loc").innerHTML=(f?.locais||[]).map(l=>`<option>${esc(l)}</option>`).join("")}
-function saveAtivo(){
-  const g=i=>$("#"+i).value.trim();if(!g("n_fab")||!g("n_mod"))return toast("Informe fabricante e modelo");
-  if(g("n_ser")&&S.ativos.some(a=>a.serie.toLowerCase()===g("n_ser").toLowerCase()))return toast("Número de série já cadastrado");
-  const a={cod:nextCode(g("n_cat")),cat:g("n_cat"),fab:g("n_fab"),mod:g("n_mod"),serie:g("n_ser"),fil:g("n_fil"),loc:g("n_loc"),resp:g("n_res"),st:g("n_res")?"Em uso":"Disponível",cond:"Bom",aq:"",gar:g("n_gar"),obs:""};
-  S.ativos.push(a);S.movs.unshift({id:movId(),cod:a.cod,tipo:"Cadastro inicial",dt:now(),user:me,de:"—",para:`${fil(a.fil)} / ${a.loc}`,resp0:"",resp1:a.resp,motivo:"Entrada no inventário"});
-  save();render();ficha(a.cod)
-}
-function ficha(c){
-  const a=S.ativos.find(x=>x.cod===c);if(!a)return toast("Código não encontrado: "+c);history.replaceState(null,"","#"+c);
-  const H=S.movs.filter(m=>m.cod===c);
-  modal(`<div class="row" style="justify-content:space-between"><div><div class="mu">${CATS[a.cat]}</div><h2 style="margin:0">${a.cod}</h2></div><span class="tag t-${a.st.replace(" ","-")}">${a.st}</span></div>
-  <div class="qr card">${qrSvg(c)}<div><b>${esc(a.fab+" "+a.mod)}</b><br><span class="mu">Série:</span> ${esc(a.serie)||"—"}<br><span class="mu">Filial:</span> ${esc(fil(a.fil))}<br><span class="mu">Local:</span> ${esc(a.loc)}<br><span class="mu">Responsável:</span> ${esc(a.resp)||"—"}<br><span class="mu">Condição:</span> ${a.cond}${a.gar?`<br><span class="mu">Garantia:</span> ${a.gar}`:""}</div></div>
-  <div class="row"><button class="btn s" onclick="acao('${c}','Transferência')">Transferir</button><button class="btn s" onclick="acao('${c}','Atribuição')">Atribuir</button><button class="btn s" onclick="acao('${c}','${a.st==="Manutenção"?"Retorno da manutenção":"Envio à manutenção"}')">${a.st==="Manutenção"?"Retorno manutenção":"Manutenção"}</button><button class="btn s g" onclick="acao('${c}','Devolução')">Devolver</button><button class="btn s d" onclick="acao('${c}','Baixa')">Baixar</button><button class="btn s g" onclick="etiqueta('${c}')">🖨️ Etiqueta</button></div>
-  <b>Histórico</b><div class="tl" style="margin-top:10px">${H.map(m=>`<div><b>${m.tipo}</b> · <span class="mu">${m.dt} · ${esc(m.user)}</span><br>${esc(m.de)} → ${esc(m.para)}${m.motivo?`<br><span class="mu">${esc(m.motivo)}</span>`:""}</div>`).join("")||'<span class="mu">Sem registros.</span>'}</div>
-  <button class="btn g" onclick="closeM()" style="margin-top:8px">Fechar</button>`)
-}
-function acao(c,t){
-  const a=S.ativos.find(x=>x.cod===c);
-  if(a.st==="Baixado")return toast("Ativo baixado: exige reativação formal");
-  if(t==="Atribuição"&&a.st==="Manutenção")return toast("Equipamento em manutenção não pode ser entregue");
-  modal(`<h2>${t}</h2><p class="mu">${c} · ${esc(a.fab+" "+a.mod)}</p><div class="f">
-  ${t==="Transferência"?`<label>Filial destino<select id="a_fil" onchange="alocs()">${S.filiais.map(f=>`<option value="${f.id}">${esc(f.nome)}</option>`).join("")}</select></label><label>Local destino<select id="a_loc"></select></label>`:""}
-  ${t==="Atribuição"?`<label>Novo responsável (e-mail)<input id="a_res" type="email"></label>`:""}
-  <label style="grid-column:1/-1">Motivo / justificativa<textarea id="a_mot" rows="2"></textarea></label></div>
-  <div class="row" style="margin-top:14px"><button class="btn" onclick="doAcao('${c}','${t}')">Confirmar</button><button class="btn g" onclick="ficha('${c}')">Voltar</button></div>`);if(t==="Transferência")alocs()
-}
-function alocs(){const f=S.filiais.find(f=>f.id===$("#a_fil").value);$("#a_loc").innerHTML=(f?.locais||[]).map(l=>`<option>${esc(l)}</option>`).join("")}
-function doAcao(c,t){
-  const a=S.ativos.find(x=>x.cod===c),mot=$("#a_mot").value.trim();if((t==="Baixa"||t==="Perda/Avaria")&&!mot)return toast("Justificativa obrigatória");
-  const d={};if(t==="Transferência"){d.fil=$("#a_fil").value;d.loc=$("#a_loc").value}if(t==="Atribuição"){d.resp=$("#a_res").value.trim();if(!d.resp)return toast("Informe o responsável")}
-  mov(a,t,d,mot);render();ficha(c);toast("Movimentação registrada")
-}
-function etiqueta(c){
-  modal(`<div class="lab" style="text-align:center;padding:12px;border:2px dashed var(--bd);border-radius:12px;width:220px;margin:auto"><div class="qr" style="justify-content:center">${qrSvg(c)}</div><b style="font-size:18px">${c}</b><div style="font-size:11px">Patrimônio de TI</div></div>
-  <div class="row" style="margin-top:14px;justify-content:center"><button class="btn" onclick="print()">Imprimir</button><button class="btn g" onclick="ficha('${c}')">Voltar</button></div>`)
-}
-let stream=null,timer=null;
-function scan(){return`<h2>Escanear equipamento</h2><div class="card"><video id="vd" playsinline muted style="width:100%;max-height:320px;border-radius:12px;background:#000;display:none"></video><p class="mu" id="cm">A câmera abre se o navegador suportar leitura de QR. Se preferir, digite o código abaixo.</p>
-  <div class="row"><input id="mc" placeholder="Ex.: TI-NB-000001" style="flex:1" onkeydown="if(event.key==='Enter')lookup()"><button class="btn" onclick="lookup()">Buscar</button></div></div>
-  <p class="mu">Dica: o QR Code abre diretamente a ficha. Para uso em campo, escaneie com a câmera nativa do celular.</p>`}
-const lookup=()=>{const c=$("#mc").value.trim().toUpperCase();c&&ficha(c)};
-async function startCam(){
-  stopCam();if(!("BarcodeDetector" in window)||!navigator.mediaDevices)return;
-  try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}});const v=$("#vd");v.srcObject=stream;v.style.display="block";await v.play();$("#cm").textContent="Aponte para o QR Code do equipamento.";
-  const bd=new BarcodeDetector({formats:["qr_code"]});timer=setInterval(async()=>{try{const r=await bd.detect(v);if(r[0]){const t=r[0].rawValue,c=t.includes("#")?t.split("#").pop():t;stopCam();ficha(c)}}catch(e){}},500)}catch(e){}
-}
-function stopCam(){clearInterval(timer);stream?.getTracks().forEach(t=>t.stop());stream=null}
-function supr(){
-  return`<h2>Suprimentos e estoque</h2><div class="row"><button class="btn" onclick="formSup()">+ Novo item</button></div>
-  ${S.supr.map((s,i)=>`<div class="card"><div class="row" style="justify-content:space-between;margin-bottom:8px"><div><b>${esc(s.desc)}</b> <span class="mu">${s.cod} · mín ${s.min} · máx ${s.max}</span></div></div>
-  <div class="grid" style="margin:0">${S.filiais.map(f=>{const n=s.saldos[f.id]??0;return`<div class="card" style="margin:0;padding:10px"><span class="mu">${esc(f.nome)}</span><div class="row" style="margin:6px 0 0"><b style="font-size:20px;color:${n<s.min?"var(--er)":"inherit"}">${n}</b><button class="btn g s" onclick="aj(${i},'${f.id}',-1)">−</button><button class="btn g s" onclick="aj(${i},'${f.id}',1)">+</button></div></div>`}).join("")}</div></div>`).join("")||'<div class="card mu">Nenhum item de suprimento cadastrado.</div>'}`
-}
-function aj(i,f,d){const s=S.supr[i];s.saldos[f]=Math.max(0,(s.saldos[f]||0)+d);save();render()}
-function formSup(){modal(`<h2>Novo suprimento</h2><div class="f"><label>Código<input id="s_c" placeholder="SUP-MOU-002"></label><label>Descrição<input id="s_d"></label><label>Estoque mínimo<input id="s_mi" type="number" value="10"></label><label>Estoque máximo<input id="s_ma" type="number" value="100"></label></div><div class="row" style="margin-top:14px"><button class="btn" onclick="saveSup()">Salvar</button><button class="btn g" onclick="closeM()">Cancelar</button></div>`)}
-function saveSup(){const c=$("#s_c").value.trim().toUpperCase(),d=$("#s_d").value.trim();if(!c||!d)return toast("Preencha código e descrição");if(S.supr.some(s=>s.cod===c))return toast("Código já existe");S.supr.push({cod:c,desc:d,min:+$("#s_mi").value,max:+$("#s_ma").value,saldos:{}});save();closeM();render()}
-function movs(){return`<h2>Histórico de movimentações</h2><div class="card tw"><table><tr><th>ID</th><th>Data</th><th>Ativo</th><th>Tipo</th><th>Origem</th><th>Destino</th><th>Usuário</th></tr>${S.movs.map(m=>`<tr class="c" onclick="ficha('${m.cod}')"><td>${m.id}</td><td>${m.dt}</td><td><b>${m.cod}</b></td><td>${m.tipo}</td><td>${esc(m.de)}</td><td>${esc(m.para)}</td><td>${esc(m.user)}</td></tr>`).join("")||'<tr><td class="mu">Sem registros.</td></tr>'}</table></div><p class="mu">O histórico é somente leitura: correções devem gerar nova movimentação com justificativa.</p>`}
-function filiais(){return`<h2>Filiais e locais</h2><div class="card"><div class="row"><input id="fn" placeholder="Nome da filial" style="flex:1"><button class="btn" onclick="addFil()">+ Adicionar filial</button></div></div>
-  ${S.filiais.map((f,i)=>`<div class="card"><b>${f.id} · ${esc(f.nome)}</b> <span class="mu">${S.ativos.filter(a=>a.fil===f.id).length} ativos</span><div class="row" style="margin-top:10px">${f.locais.map(l=>`<span class="tag">${esc(l)}</span>`).join("")}<input id="l${i}" placeholder="Novo local" style="width:150px"><button class="btn g s" onclick="addLoc(${i})">+</button></div></div>`).join("")}`}
-function addFil(){const n=$("#fn").value.trim();if(!n)return;S.filiais.push({id:"FIL-"+String(S.filiais.length+1).padStart(3,"0"),nome:n,locais:["Almoxarifado de TI"]});save();render()}
-function addLoc(i){const n=$("#l"+i).value.trim();if(!n)return;S.filiais[i].locais.push(n);save();render()}
-async function exportCsv(){
-  const rows=[["Código","Categoria","Fabricante","Modelo","Série","Filial","Local","Responsável","Status"],...S.ativos.map(a=>[a.cod,CATS[a.cat],a.fab,a.mod,a.serie,fil(a.fil),a.loc,a.resp,a.st])];
-  const csv="\ufeff"+rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(";")).join("\n");
-  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download="ativos-ti.csv";a.click()
+  if(sb)sb.channel("eq").on("postgres_changes",{event:"*",schema:"public",table:TB},()=>{clearTimeout(rt);rt=setTimeout(async()=>{await chain;await load();if(!$("#md").innerHTML&&!document.activeElement.matches("input"))render()},700)}).subscribe()
 }
 start();
-addEventListener("hashchange",()=>{const h=location.hash.slice(1);if(h&&S.ativos.some(a=>a.cod===h))ficha(h)});
 </script></body></html>
